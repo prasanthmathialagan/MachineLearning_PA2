@@ -111,7 +111,10 @@ def mapNonLinear(x,p):
     # p - integer (>= 0)                                                       
     # Outputs:                                                                 
     # Xd - (N x (d+1))                                                         
-    # IMPLEMENT THIS METHOD
+
+    a = np.array(x).reshape(x.shape[0],1)
+    b = range(p + 1)
+    Xd = np.power(a,b)
     return Xd
 
 # Main script
