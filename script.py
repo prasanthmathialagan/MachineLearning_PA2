@@ -15,10 +15,24 @@ def ldaLearn(X,y):
     #
     # Outputs
     # means - A d x k matrix containing learnt means for each of the k classes
-    # covmat - A single d x d learnt covariance matrix 
-    
+    # covmat - A single d x d learnt covariance matrix
+
+
     # IMPLEMENT THIS METHOD
-    
+
+    d = X.shape[1]                  # Number of attributes in the input
+    y = y.reshape(y.size)           # Flattening the output matrix containing class labels
+
+    diffClasses = np.unique(y)      # Getting the matrix containing only the unique labels
+    k = np.prod(diffClasses.shape)  # Getting the count of unique labels
+
+    means = np.zeros((d, k))        # initializing the means matrix with 0's and size d x k where k is number of unique output labels
+
+    for cl in range(diffClasses.size):
+        means[:,cl] = np.mean(X[y == diffClasses[cl]],0)    #Calculating the mean corresponding to different classes
+
+    covmat = np.cov(X.T)            #Covariance matrix for the pooled data
+
     return means,covmat
 
 def qdaLearn(X,y):
@@ -29,9 +43,22 @@ def qdaLearn(X,y):
     # Outputs
     # means - A d x k matrix containing learnt means for each of the k classes
     # covmats - A list of k d x d learnt covariance matrices for each of the k classes
-    
+
     # IMPLEMENT THIS METHOD
-    
+
+    d = X.shape[1]                                      # Number of attributes in the input
+    y = y.reshape(y.size)                               # Flattening the output matrix containing class labels
+
+    diffClasses = np.unique(y)                          # Getting the matrix containing only the unique labels
+    k = np.prod(diffClasses.shape)                      # Getting the count of unique labels
+
+    means = np.zeros((d,k))                             # initializing the means matrix with 0's and size d x k where k is number of unique output labels
+    covmats = []                                        # initializing the list containing covariance matrices for each of the k classes
+
+    for cl in range(diffClasses.size):
+        means[:, cl] = np.mean(X[y == diffClasses[cl]], 0)
+        covmats.append(np.cov(X[y == diffClasses[cl]].T))               #Calculating the mean and covariance for each of the classes seperately
+
     return means,covmats
 
 def ldaTest(means,covmat,Xtest,ytest):
@@ -44,7 +71,32 @@ def ldaTest(means,covmat,Xtest,ytest):
     # ypred - N x 1 column vector indicating the predicted labels
 
     # IMPLEMENT THIS METHOD
+    N = Xtest.shape[0]                  # Calculate the number of input samples from the given data
+    d = Xtest.shape[1]                  # Number of attributes in the input
+    nClasses = means.shape[1]           # Getting the count of unique labels/classes
+
+    Pmat = np.zeros((N, nClasses))      # Probability matrix for classifying the input to different labels
+
+
+    for xin in range(N):
+        for m in range(means.shape[1]):
+            term = -(np.dot((Xtest[xin]-means[:, m].T).T, np.dot(inv(covmat), (Xtest[xin]-means[:, m].T))))/2.0
+            expTerm = np.exp(term)
+            den = pow((2*pi), d/2.0)*sqrt(det(covmat))
+            Pmat[xin,m] = expTerm/den                      # Equation for Normal distribution
+
+    maxIndices = np.argmax(Pmat, axis=1)+1                # Getting the indices of the column containing the max probability for each of the rows
+    ypred = np.array(maxIndices)[np.newaxis].T            # Converting it to a column vector
+
+    matchCount = 0
+    for i in range(N):
+        if ypred[i] == ytest[i]:                           # Getting the count of matching labels b/w predicted and true labels
+            matchCount += 1
+
+    acc = matchCount/N * 100                               # Calculating the accuracy manually
+
     return acc,ypred
+
 
 def qdaTest(means,covmats,Xtest,ytest):
     # Inputs
@@ -56,6 +108,30 @@ def qdaTest(means,covmats,Xtest,ytest):
     # ypred - N x 1 column vector indicating the predicted labels
 
     # IMPLEMENT THIS METHOD
+
+    N = Xtest.shape[0]                  # Calculate the number of input samples from the given data
+    d = Xtest.shape[1]                  # Number of attributes in the input
+    nClasses = means.shape[1]           # Getting the count of unique labels/classes
+
+    Pmat = np.zeros((N, nClasses))      # Probability matrix for classifying the input to different labels
+
+    for xin in range(N):
+        for m in range(nClasses):
+            term = -(np.dot((Xtest[xin] - means[:, m].T).T, np.dot(inv(covmats[m]), (Xtest[xin] - means[:, m].T)))) / 2.0
+            expTerm = np.exp(term)
+            den = pow((2 * pi), d / 2.0) * sqrt(det(covmats[m]))
+            Pmat[xin, m] = expTerm / den    # Equation for Normal distribution
+
+    maxIndices = np.argmax(Pmat, axis=1) + 1                # Getting the indices of the column containing the max probability for each of the rows
+    ypred = np.array(maxIndices)[np.newaxis].T              # Converting it to a column vector
+
+    matchCount = 0
+    for i in range(N):
+        if ypred[i] == ytest[i]:            # Getting the count of matching labels b/w predicted and true labels
+            matchCount += 1
+
+    acc = matchCount/N * 100                # Calculating the accuracy manually
+
     return acc,ypred
 
 def learnOLERegression(X,y):
