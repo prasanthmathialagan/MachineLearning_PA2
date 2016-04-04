@@ -79,7 +79,7 @@ def ldaTest(means,covmat,Xtest,ytest):
 
 
     for xin in range(N):
-        for m in range(means.shape[1]):
+        for m in range(nClasses):
             term = -(np.dot((Xtest[xin]-means[:, m].T).T, np.dot(inv(covmat), (Xtest[xin]-means[:, m].T))))/2.0
             expTerm = np.exp(term)
             den = pow((2*pi), d/2.0)*sqrt(det(covmat))
@@ -135,11 +135,11 @@ def qdaTest(means,covmats,Xtest,ytest):
     return acc,ypred
 
 def learnOLERegression(X,y):
-    # Inputs:                                                         
-    # X = N x d 
-    # y = N x 1                                                               
-    # Output: 
-    # w = d x 1                                                                
+    # Inputs:
+    # X = N x d
+    # y = N x 1
+    # Output:
+    # w = d x 1
 
     X_T = X.transpose()
     w = np.linalg.solve(np.dot(X_T, X), np.dot(X_T, y))
@@ -147,11 +147,11 @@ def learnOLERegression(X,y):
 
 def learnRidgeRegression(X,y,lambd):
     # Inputs:
-    # X = N x d                                                               
-    # y = N x 1 
+    # X = N x d
+    # y = N x 1
     # lambd = ridge parameter (scalar)
-    # Output:                                                                  
-    # w = d x 1                                                                
+    # Output:
+    # w = d x 1
 
     X_T = X.transpose()
     I = np.identity(X.shape[1])
@@ -176,17 +176,17 @@ def regressionObjVal(w, X, y, lambd):
 
     # compute squared error (scalar) and gradient of squared error with respect
     # to w (vector) for the given data X and y and the regularization parameter
-    # lambda                                                                  
+    # lambda
 
-    # IMPLEMENT THIS METHOD                                             
+    # IMPLEMENT THIS METHOD
     return error, error_grad
 
 def mapNonLinear(x,p):
-    # Inputs:                                                                  
-    # x - a single column vector (N x 1)                                       
-    # p - integer (>= 0)                                                       
-    # Outputs:                                                                 
-    # Xd - (N x (d+1))                                                         
+    # Inputs:
+    # x - a single column vector (N x 1)
+    # p - integer (>= 0)
+    # Outputs:
+    # Xd - (N x (d+1))
 
     a = np.array(x).reshape(x.shape[0],1)
     b = range(p + 1)
@@ -196,7 +196,7 @@ def mapNonLinear(x,p):
 # Main script
 
 # Problem 1
-# load the sample data                                                                 
+# load the sample data
 if sys.version_info.major == 2:
     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
 else:
@@ -228,6 +228,8 @@ plt.show()
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])))
 plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+
+plt.show()
 
 # Problem 2
 
@@ -265,7 +267,7 @@ k = 101
 lambdas = np.linspace(0, 1, num=k)
 i = 0
 rmses4 = np.zeros((k,1))
-opts = {'maxiter' : 100}    # Preferred value.                                                
+opts = {'maxiter' : 100}    # Preferred value.
 w_init = np.ones((X_i.shape[1],1))
 for lambd in lambdas:
     args = (X_i, y, lambd)
